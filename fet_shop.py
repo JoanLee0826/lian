@@ -197,7 +197,7 @@ def info_thread_main(str_page, end_page):
 if __name__ == '__main__':
 
     t1 = datetime.datetime.now()
-    info_thread_main(1000, 1050)
+    info_thread_main(1000, 10000)
     t2 = datetime.datetime.now()
     print((t2 - t1).seconds)
     # main(150, 180)
