@@ -87,16 +87,18 @@ def get_info_each(id):
     chrome_opt = webdriver.ChromeOptions()
     chrome_opt.add_argument('--incognito')  # 无缓存
     chrome_opt.add_argument('--headless ')  # 无头
+
     prefs = {"profile.managed_default_content_settings.images": 2}  # 关闭图片，响应更快
     chrome_opt.add_experimental_option("prefs", prefs)
     # chrome_opt.add_argument('--headless')
     driver = webdriver.Chrome(executable_path='chromedriver.exe', chrome_options=chrome_opt)
+    driver.set_page_load_timeout(20)
     url_base = "https://order.jst-mfg.com/InternetShop/app/index.php?product="
 
     url = url_base + str(id) + '#showProductDetail'
     print(url)
     driver.get(url)
-    time.sleep(random.uniform(1, 2))
+    time.sleep(random.uniform(5, 7))
     if not driver.find_elements_by_xpath("//div[@class='col-md-12']"):
         row_html = driver.find_element_by_xpath("//*").get_attribute("outerHTML")
 
@@ -155,10 +157,11 @@ def id_thread_main(str_page=150, end_page=170):
 
     while True:
         thread_list = [threading.Thread(target=get_id_each, args=(page_queue.get(),))
-                       for i in range(15) if not page_queue.empty()]
+                       for i in range(18) if not page_queue.empty()]
 
         for each in thread_list:
             each.start()
+            time.sleep(random.random())
 
         for each in thread_list:
             each.join()
@@ -172,14 +175,16 @@ def id_thread_main(str_page=150, end_page=170):
 
 def info_thread_main(str_page, end_page):
     info_page_queue = queue.Queue()
-    id_df = pd.read_excel(r'F:\DEDE\lian\all_id.xlsx')
-
-    for each in id_df['id'][str_page:end_page]:
+    id_df_all = pd.read_excel(r'all_id.xlsx')
+    id_df_clean = pd.read_excel(r'D:\Py\qj\lian\jst_shop_clean.xlsx')
+    id_list = id_df_all[-id_df_all['id'].isin(id_df_clean['id'])]['id']
+    # for each in id_df['id'][str_page:end_page]:
+    for each in id_list:
         info_page_queue.put(each)
 
     while True:
         thread_list = [threading.Thread(target=get_info_each, args=(info_page_queue.get(),))
-                       for i in range(15) if not info_page_queue.empty()]
+                       for i in range(10) if not info_page_queue.empty()]
 
         for each in thread_list:
             each.start()
@@ -197,7 +202,17 @@ def info_thread_main(str_page, end_page):
 if __name__ == '__main__':
 
     t1 = datetime.datetime.now()
-    info_thread_main(1000, 10000)
+    # info_thread_main(18000, 19500)
+    # info_thread_main(2000, 5000)
+    # info_thread_main(5000, 6000)
+    # time.sleep(60)
+    # info_thread_main(6000, 7000)
+    # time.sleep(60)
+    # info_thread_main(7000, 8000)
+    # time.sleep(60)
+    # info_thread_main(8000, 9000)
+    # time.sleep(60)
+    info_thread_main(1, 20000)
     t2 = datetime.datetime.now()
     print((t2 - t1).seconds)
     # main(150, 180)
